@@ -1,0 +1,13 @@
+{
+    "site_name": "ThriftX",
+    "site_email": "admin@thriftx.com",
+    "site_phone": "",
+    "site_address": "",
+    "currency": "USD",
+    "tax_rate": 0.0,
+    "shipping_fee": 0.0,
+    "maintenance_mode": 0,
+    "registration_enabled": 1,
+    "email_notifications": 1,
+    "updated_at": "2024-01-01 00:00:00"
+}
