@@ -20,15 +20,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
             </a>
         </div>
         
-        <div class="search-section">
-            <div class="search-box">
-                <input type="text" placeholder="Search your products..." class="search-input">
-                <button class="search-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                </button>
+    
             </div>
         </div>
     </div>
