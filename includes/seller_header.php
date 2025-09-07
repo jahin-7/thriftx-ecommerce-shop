@@ -19,10 +19,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
                 <span class="logo-text">ThriftX Seller</span>
             </a>
         </div>
-        
-    
-            </div>
-        </div>
     </div>
 
     <div class="header-center">
