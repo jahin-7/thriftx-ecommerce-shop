@@ -30,7 +30,7 @@ $__max_price = isset($_GET['max_price']) ? (int)$_GET['max_price'] : 10000;
 ?>
 <!-- Sidebar Toggle -->
 <input id="sidebar-toggle" type="checkbox" checked>
-<label class="toggle" for="sidebar-toggle">
+<label class="sidebar-hamburger" for="sidebar-toggle">
     <div class="bars"></div>
     <div class="bars"></div>
     <div class="bars"></div>

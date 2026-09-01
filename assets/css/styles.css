@@ -813,7 +813,8 @@ body {
   display: none;
 }
 
-.toggle {
+.sidebar-hamburger {
+  opacity: 1;
   position: fixed;
   top: 11px;
   left: 16px;
@@ -834,12 +835,12 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-.toggle:hover {
+.sidebar-hamburger:hover {
   transform: scale(1.05);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
 }
 
-.bars {
+.sidebar-hamburger .bars {
   width: 18px;
   height: 2.5px;
   background-color: #1f1f1f;
@@ -849,20 +850,20 @@ body {
 }
 
 /* Toggle Animation */
-#sidebar-toggle:checked + .toggle {
+#sidebar-toggle:checked + .sidebar-hamburger {
   transform: rotate(180deg);
 }
 
-#sidebar-toggle:checked + .toggle .bars:nth-child(1) {
+#sidebar-toggle:checked + .sidebar-hamburger .bars:nth-child(1) {
   transform: rotate(45deg) translate(6px, 6px);
 }
 
-#sidebar-toggle:checked + .toggle .bars:nth-child(2) {
+#sidebar-toggle:checked + .sidebar-hamburger .bars:nth-child(2) {
   opacity: 0;
   transform: scale(0);
 }
 
-#sidebar-toggle:checked + .toggle .bars:nth-child(3) {
+#sidebar-toggle:checked + .sidebar-hamburger .bars:nth-child(3) {
   transform: rotate(-45deg) translate(6px, -6px);
 }
 
@@ -5279,12 +5280,12 @@ body.admin-layout .page-content {
     gap: 20px;
   }
 
-  .toggle {
+  .sidebar-hamburger {
     width: 35px;
     height: 35px;
   }
 
-  .bars {
+  .sidebar-hamburger .bars {
     width: 18px;
     height: 2px;
   }
@@ -5383,7 +5384,7 @@ body.admin-layout .page-content {
     padding: 30px 15px;
   }
 
-  .toggle {
+  .sidebar-hamburger {
     top: 15px;
     left: 15px;
     width: 32px;
