@@ -1,4 +1,14 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Check if user is logged in and is admin
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ../index.php');
+    exit;
+}
+
 include('../config/db.php');  // Include database connection
 
 // Get order ID from URL
@@ -36,7 +46,7 @@ $order = $order_result->fetch_assoc();
     <title>Order Details</title>
     <link rel="stylesheet" href="../assets/css/styles.css"> <!-- Your CSS file -->
 </head>
-<body>
+<body class="<?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
 
 <!-- Admin Header -->
 <header class="header">
@@ -55,12 +65,12 @@ $order = $order_result->fetch_assoc();
 <!-- Order Details Section -->
 <section class="order-details">
     <h2>Order Details</h2>
-    <p><strong>Order ID:</strong> <?= $order['id']; ?></p>
-    <p><strong>Customer Name:</strong> <?= $order['name']; ?></p>
-    <p><strong>Email:</strong> <?= $order['email']; ?></p>
-    <p><strong>Shipping Address:</strong> <?= $order['address']; ?></p>
-    <p><strong>Order Date:</strong> <?= $order['order_date']; ?></p>
-    <p><strong>Status:</strong> <?= $order['status']; ?></p>
+    <p><strong>Order ID:</strong> <?= (int) $order['id']; ?></p>
+    <p><strong>Customer Name:</strong> <?= htmlspecialchars($order['name']); ?></p>
+    <p><strong>Email:</strong> <?= htmlspecialchars($order['email']); ?></p>
+    <p><strong>Shipping Address:</strong> <?= htmlspecialchars($order['address']); ?></p>
+    <p><strong>Order Date:</strong> <?= htmlspecialchars($order['order_date']); ?></p>
+    <p><strong>Status:</strong> <?= htmlspecialchars($order['status']); ?></p>
     <h3>Products in this Order</h3>
     <table>
         <tr>
@@ -71,14 +81,14 @@ $order = $order_result->fetch_assoc();
         </tr>
         <?php while ($item = $order_items_result->fetch_assoc()): ?>
             <tr>
-                <td><?= $item['name']; ?></td>
-                <td>৳ <?= $item['price']; ?></td>
-                <td><?= $item['quantity']; ?></td>
-                <td>৳ <?= $item['price'] * $item['quantity']; ?></td>
+                <td><?= htmlspecialchars($item['name']); ?></td>
+                <td>৳ <?= number_format((float) $item['price'], 2); ?></td>
+                <td><?= (int) $item['quantity']; ?></td>
+                <td>৳ <?= number_format((float) $item['price'] * (int) $item['quantity'], 2); ?></td>
             </tr>
         <?php endwhile; ?>
     </table>
-    <p><strong>Total Amount:</strong> ৳ <?= $order['total']; ?></p>
+    <p><strong>Total Amount:</strong> ৳ <?= number_format((float) $order['total'], 2); ?></p>
 </section>
 
 </body>

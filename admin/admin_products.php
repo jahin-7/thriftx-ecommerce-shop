@@ -87,7 +87,7 @@ $categories_result = $conn->query($categories_query);
     <title>Admin Products - ThriftX</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body class="admin-layout">
+<body class="admin-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Admin Header -->
     <?php include('../includes/admin_header.php'); ?>
 
@@ -142,7 +142,7 @@ $categories_result = $conn->query($categories_query);
                     <?php while ($product = $result->fetch_assoc()): ?>
                         <div class="admin-product-card">
                             <div class="product-image">
-                                <img src="<?= htmlspecialchars($product['image_url']); ?>" 
+                                <img src="<?= !empty($product['image_url']) ? htmlspecialchars('../seller/' . $product['image_url']) : 'https://via.placeholder.com/300x200?text=No+Image'; ?>"
                                      alt="<?= htmlspecialchars($product['name']); ?>"
                                      onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
                                 <div class="product-status status-<?= $product['status'] ?>">

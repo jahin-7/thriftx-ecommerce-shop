@@ -3,9 +3,10 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 include('../config/db.php');  // Include database connection
+require_once('../includes/activity_log.php');
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+// Check if user is logged in and is a seller
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
     header('Location: ../index.php');
     exit;
 }
@@ -41,8 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("ssssssi", $name, $price, $category, $description, $specifications, $product_id, $_SESSION['user_id']);
 
     if ($stmt->execute()) {
-        echo "Product updated successfully.";
-        header("Location: product_page.php?id=$product_id");  // Redirect to product page after successful update
+        logActivity($conn, $_SESSION['user_id'], 'product_updated', 'product', $product_id, $name);
+        $_SESSION['success'] = "Product updated successfully.";
+        header("Location: seller_products.php");
         exit;
     } else {
         echo "Error updating product: " . $conn->error;
@@ -58,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Edit Product - ThriftX Seller</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
+<body class="<?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Seller Header -->
     <?php include('../includes/seller_header.php'); ?>
 
@@ -104,8 +106,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <option value="electronics" <?= $product['category'] == 'electronics' ? 'selected' : '' ?>>Electronics</option>
                                     <option value="clothing" <?= $product['category'] == 'clothing' ? 'selected' : '' ?>>Clothing</option>
                                     <option value="furniture" <?= $product['category'] == 'furniture' ? 'selected' : '' ?>>Furniture</option>
+                                    <option value="services" <?= $product['category'] == 'services' ? 'selected' : '' ?>>Services</option>
                                     <option value="books" <?= $product['category'] == 'books' ? 'selected' : '' ?>>Books</option>
-                                    <option value="sports" <?= $product['category'] == 'sports' ? 'selected' : '' ?>>Sports</option>
+                                    <option value="sports" <?= $product['category'] == 'sports' ? 'selected' : '' ?>>Sports & Outdoors</option>
+                                    <option value="home_garden" <?= $product['category'] == 'home_garden' ? 'selected' : '' ?>>Home & Garden</option>
+                                    <option value="beauty_health" <?= $product['category'] == 'beauty_health' ? 'selected' : '' ?>>Beauty & Health</option>
+                                    <option value="toys_games" <?= $product['category'] == 'toys_games' ? 'selected' : '' ?>>Toys & Games</option>
                                     <option value="other" <?= $product['category'] == 'other' ? 'selected' : '' ?>>Other</option>
                                 </select>
                             </div>

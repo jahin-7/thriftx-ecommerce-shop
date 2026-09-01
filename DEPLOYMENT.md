@@ -2,7 +2,7 @@
 
 ## Pre-Deployment Checklist
 
-### ✅ Files Moved to Scrap Folder
+### Files moved to scrap folder
 - `add_cart_table.php` - Development script
 - `add_cart_table.sql` - Development SQL
 - `check_database.php` - Development script
@@ -11,7 +11,7 @@
 - `setup_database.php` - Development script
 - `thriftx_database.sql` - Old database file (replaced by database_setup.sql)
 
-### ✅ Production-Ready Files
+### Production-ready files
 - `database_setup.sql` - Clean database schema
 - `.gitignore` - Proper Git ignore rules
 - `README.md` - Comprehensive documentation
@@ -37,7 +37,7 @@ chmod 755 seller/uploads/
 
 ### 4. Default Admin Account
 - Email: `admin@thriftx.com`
-- Password: `admin123`
+- Password: `password`
 - **Important**: Change this password immediately after deployment!
 
 ## Environment Requirements

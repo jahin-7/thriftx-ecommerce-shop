@@ -54,6 +54,14 @@ if (isset($_POST['action']) && $_POST['action'] == 'remove_from_cart') {
 $cart_items = $cartManager->getCartItems($user['id']);
 $subtotal = $cartManager->getCartTotal($user['id']);
 
+$has_unavailable_item = false;
+foreach ($cart_items as $cart_item) {
+    if ($cart_item['status'] !== 'active') {
+        $has_unavailable_item = true;
+        break;
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -64,24 +72,26 @@ $subtotal = $cartManager->getCartTotal($user['id']);
     <title>Shopping Cart - ThriftX</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
+<body class="customer-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
+    <?php include('../includes/customer_sidebar.php'); ?>
+
     <!-- Page Content -->
     <div class="page-content customer-page-content">
         <?php include('../includes/customer_header.php'); ?>
-        
+
         <!-- Page Header -->
         <div class="page-header">
-            <div class="page-title">
-                <h1>Shopping Cart</h1>
-                <p>Review your items before checkout</p>
-            </div>
-            <div class="page-actions">
-                <a href="dashboard.php" class="btn btn-secondary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <div class="page-title-group">
+                <a href="dashboard.php" class="page-back-btn" aria-label="Back to Dashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12,19 5,12 12,5"></polyline>
                     </svg>
-                    Continue Shopping
                 </a>
+                <div class="page-title">
+                    <h1>Shopping Cart</h1>
+                    <p>Review your items before checkout</p>
+                </div>
             </div>
         </div>
 
@@ -126,33 +136,45 @@ $subtotal = $cartManager->getCartTotal($user['id']);
                     <div class="cart-items">
                         <h3>Cart Items (<?= count($cart_items); ?>)</h3>
                         <?php foreach ($cart_items as $item): ?>
-                            <div class="cart-item" data-product-id="<?= $item['product_id']; ?>">
+                            <?php $item_available = $item['status'] === 'active'; ?>
+                            <div class="cart-item<?= $item_available ? '' : ' cart-item--unavailable' ?>" data-product-id="<?= $item['product_id']; ?>">
                                 <div class="cart-item-image">
-                                    <img src="<?= !empty($item['image_url']) ? '../seller/uploads/' . $item['image_url'] : 'https://via.placeholder.com/120x120?text=Product'; ?>" 
+                                    <img src="<?= !empty($item['image_url']) ? '../seller/' . htmlspecialchars($item['image_url']) : 'https://via.placeholder.com/120x120?text=Product'; ?>"
                                          alt="<?= htmlspecialchars($item['name']); ?>">
                                 </div>
                                 <div class="cart-item-details">
                                     <h4 class="cart-item-title"><?= htmlspecialchars($item['name']); ?></h4>
                                     <p class="cart-item-price">৳<?= number_format($item['price'], 2); ?></p>
+                                    <?php if (!$item_available): ?>
+                                        <p class="cart-item-unavailable-notice">
+                                            <?= $item['status'] === 'sold' ? 'No longer available, this item has been sold.' : 'No longer available.'; ?>
+                                            Please remove it to continue.
+                                        </p>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="quantity-controls">
-                                    <form method="POST" style="display: inline;">
-                                        <input type="hidden" name="action" value="update_quantity">
-                                        <input type="hidden" name="product_id" value="<?= $item['product_id']; ?>">
-                                        <input type="hidden" name="quantity" value="<?= max(1, $item['quantity'] - 1); ?>">
-                                        <button type="submit" class="quantity-btn">-</button>
-                                    </form>
-                                    <span class="quantity-display"><?= $item['quantity']; ?></span>
-                                    <form method="POST" style="display: inline;">
-                                        <input type="hidden" name="action" value="update_quantity">
-                                        <input type="hidden" name="product_id" value="<?= $item['product_id']; ?>">
-                                        <input type="hidden" name="quantity" value="<?= $item['quantity'] + 1; ?>">
-                                        <button type="submit" class="quantity-btn">+</button>
-                                    </form>
-                                </div>
-                                <div class="item-total" data-product-id="<?= $item['product_id']; ?>">
-                                    ৳<?= number_format($item['price'] * $item['quantity'], 2); ?>
-                                </div>
+                                <?php if ($item_available): ?>
+                                    <div class="quantity-controls">
+                                        <form method="POST" style="display: inline;">
+                                            <input type="hidden" name="action" value="update_quantity">
+                                            <input type="hidden" name="product_id" value="<?= $item['product_id']; ?>">
+                                            <input type="hidden" name="quantity" value="<?= max(1, $item['quantity'] - 1); ?>">
+                                            <button type="submit" class="quantity-btn">-</button>
+                                        </form>
+                                        <span class="quantity-display"><?= $item['quantity']; ?></span>
+                                        <form method="POST" style="display: inline;">
+                                            <input type="hidden" name="action" value="update_quantity">
+                                            <input type="hidden" name="product_id" value="<?= $item['product_id']; ?>">
+                                            <input type="hidden" name="quantity" value="<?= $item['quantity'] + 1; ?>">
+                                            <button type="submit" class="quantity-btn">+</button>
+                                        </form>
+                                    </div>
+                                    <div class="item-total" data-product-id="<?= $item['product_id']; ?>">
+                                        ৳<?= number_format($item['price'] * $item['quantity'], 2); ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="quantity-controls"></div>
+                                    <div class="item-total">&mdash;</div>
+                                <?php endif; ?>
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="action" value="remove_from_cart">
                                     <input type="hidden" name="product_id" value="<?= $item['product_id']; ?>">
@@ -181,14 +203,19 @@ $subtotal = $cartManager->getCartTotal($user['id']);
                             <span>Total:</span>
                             <span id="final-total">৳<?= number_format($subtotal + 5, 2); ?></span>
                         </div>
-                        <a href="checkout.php" class="btn btn-primary checkout-btn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 12l2 2 4-4"></path>
-                                <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
-                                <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
-                            </svg>
-                            Proceed to Checkout
-                        </a>
+                        <?php if ($has_unavailable_item): ?>
+                            <p class="cart-item-unavailable-notice">Remove unavailable items before checking out.</p>
+                            <button type="button" class="btn btn-primary checkout-btn" disabled>Proceed to Checkout</button>
+                        <?php else: ?>
+                            <a href="checkout.php" class="btn btn-primary checkout-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 12l2 2 4-4"></path>
+                                    <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                                    <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                                </svg>
+                                Proceed to Checkout
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endif; ?>

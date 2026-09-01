@@ -49,11 +49,48 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
                 </svg>
                 <span>My Products</span>
             </a>
+
+            <a href="seller_orders.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'seller_orders.php' ? 'active' : '' ?>">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                </svg>
+                <span>Orders</span>
+            </a>
         </nav>
     </div>
 
     <div class="header-right">
         <div class="header-actions">
+            <a href="../theme_toggle.php?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="theme-toggle-btn" aria-label="Toggle light/dark theme" title="Toggle theme">
+                <?php if (($_SESSION['theme'] ?? 'dark') === 'light'): ?>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                <?php else: ?>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                <?php endif; ?>
+            </a>
+
+            <a href="../logout.php" class="header-logout-btn" aria-label="Logout" title="Logout">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16,17 21,12 16,7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Logout</span>
+            </a>
+
             <!-- User Menu -->
             <div class="user-dropdown">
                 <button class="user-btn">
@@ -120,18 +157,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close dropdowns when clicking outside
     document.addEventListener('click', function() {
         userMenu.classList.remove('show');
-    });
-
-    // Search functionality
-    const searchInput = document.querySelector('.search-input');
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const query = this.value.trim();
-            if (query) {
-                // Implement search functionality
-                window.location.href = `seller_products.php?search=${encodeURIComponent(query)}`;
-            }
-        }
     });
 });
 </script>

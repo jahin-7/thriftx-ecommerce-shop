@@ -4,8 +4,8 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 include('../config/db.php');  // Include database connection
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+// Check if user is logged in and is a seller
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
     header('Location: ../index.php');
     exit;
 }
@@ -26,7 +26,7 @@ $result = $stmt->get_result();
     <title>My Products - ThriftX Seller</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
+<body class="<?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Seller Header -->
     <?php include('../includes/seller_header.php'); ?>
 
@@ -48,19 +48,30 @@ $result = $stmt->get_result();
             </div>
         </div>
 
+        <!-- Success/Error Messages -->
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
+        <?php endif; ?>
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-error"><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div>
+        <?php endif; ?>
+
         <!-- Product Management Section -->
         <section class="seller-products">
             <div class="checkout-section">
                 <h2>Manage Your Products</h2>
-                
+
                 <?php if ($result->num_rows > 0): ?>
                     <div class="products-grid">
                         <?php while ($product = $result->fetch_assoc()): ?>
                             <div class="product-item">
                                 <div class="product-image">
-                                    <img src="<?= htmlspecialchars($product['image_url']); ?>" 
+                                    <img src="<?= htmlspecialchars($product['image_url']); ?>"
                                          alt="<?= htmlspecialchars($product['name']); ?>"
                                          onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                                    <span class="stock-badge stock-badge--<?= $product['status'] === 'sold' ? 'sold' : ($product['status'] === 'inactive' ? 'inactive' : 'active') ?>">
+                                        <?= ucfirst($product['status']); ?>
+                                    </span>
                                 </div>
                                 <div class="product-info">
                                     <h3><?= htmlspecialchars($product['name']); ?></h3>
@@ -69,7 +80,7 @@ $result = $stmt->get_result();
                                     <p class="product-description"><?= htmlspecialchars(substr($product['description'], 0, 100)) . '...'; ?></p>
                                     <div class="product-actions">
                                         <a href="edit_product.php?id=<?= $product['id']; ?>" class="edit-btn">Edit</a>
-                                        <a href="delete_product.php?id=<?= $product['id']; ?>" class="delete-btn" 
+                                        <a href="delete_product.php?id=<?= $product['id']; ?>" class="delete-btn"
                                            onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
                                     </div>
                                 </div>

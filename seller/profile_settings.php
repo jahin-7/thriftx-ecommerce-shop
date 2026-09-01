@@ -100,7 +100,7 @@ $user = $stmt->get_result()->fetch_assoc();
     <title>Profile & Settings - ThriftX Seller</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
+<body class="<?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Seller Header -->
     <?php include('../includes/seller_header.php'); ?>
 

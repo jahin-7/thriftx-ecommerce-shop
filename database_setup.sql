@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS products (
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     category VARCHAR(100) NOT NULL,
-    image VARCHAR(255),
+    image_url VARCHAR(255),
     specifications TEXT,
     status ENUM('active', 'inactive', 'sold') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -93,8 +93,20 @@ CREATE TABLE IF NOT EXISTS product_reviews (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
--- Insert default admin user (password: admin123)
-INSERT INTO users (first_name, last_name, email, password, role) VALUES 
+-- Activity logs table (admin/seller action audit trail)
+CREATE TABLE IF NOT EXISTS activity_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action VARCHAR(50) NOT NULL,
+    target_type VARCHAR(50) NULL,
+    target_id INT NULL,
+    details VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Insert default admin user (password: password)
+INSERT INTO users (first_name, last_name, email, password, role) VALUES
 ('Admin', 'User', 'admin@thriftx.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin')
 ON DUPLICATE KEY UPDATE email = email;
 

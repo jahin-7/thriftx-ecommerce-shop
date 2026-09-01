@@ -97,7 +97,7 @@ $analytics['overall_stats'] = $stats_result->fetch_assoc();
     <title>Admin Analytics - ThriftX</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body class="admin-layout">
+<body class="admin-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Admin Header -->
     <?php include('../includes/admin_header.php'); ?>
 

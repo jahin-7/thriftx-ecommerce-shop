@@ -3,6 +3,7 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 include('../config/db.php');
+require_once('../includes/activity_log.php');
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -22,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
 
     // Handle image upload
     $target_dir = "../seller/uploads/";
-    $target_file = '';
-    
+    $db_image_path = null; // What gets stored in products.image_url, relative to seller/
+
     if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
         $original_name = basename($_FILES["image"]["name"]);
         $imageFileType = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
@@ -58,18 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
             header("Location: admin_add_product.php");
             exit;
         }
-    } else {
-        // Use placeholder image if no image uploaded
-        $target_file = 'https://via.placeholder.com/300x200?text=No+Image';
+
+        $db_image_path = "uploads/" . $unique_filename;
     }
 
     // Insert product into database
-    $query = "INSERT INTO products (name, description, price, category, image_url, specifications, seller_id, status) 
+    $query = "INSERT INTO products (name, description, price, category, image_url, specifications, seller_id, status)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssisssis", $name, $description, $price, $category, $target_file, $specifications, $seller_id, $status);
+    $stmt->bind_param("ssisssis", $name, $description, $price, $category, $db_image_path, $specifications, $seller_id, $status);
 
     if ($stmt->execute()) {
+        logActivity($conn, $_SESSION['user_id'], 'product_created', 'product', $stmt->insert_id, $name);
         $_SESSION['success'] = "Product added successfully!";
         header("Location: admin_products.php");
         exit;
@@ -93,7 +94,7 @@ $sellers_result = $conn->query($sellers_query);
     <title>Add Product - ThriftX Admin</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body class="admin-layout">
+<body class="admin-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Admin Header -->
     <?php include('../includes/admin_header.php'); ?>
 
@@ -139,6 +140,12 @@ $sellers_result = $conn->query($sellers_query);
                             <option value="clothing">Clothing</option>
                             <option value="furniture">Furniture</option>
                             <option value="services">Services</option>
+                            <option value="books">Books</option>
+                            <option value="sports">Sports & Outdoors</option>
+                            <option value="home_garden">Home & Garden</option>
+                            <option value="beauty_health">Beauty & Health</option>
+                            <option value="toys_games">Toys & Games</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                 </div>

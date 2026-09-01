@@ -1,10 +1,18 @@
 <?php
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
+require_once('../includes/auth.php');
+require_once('../includes/cart_functions.php');
+requireLogin();
 
-// If the cart is empty, redirect to the cart page
-if (empty($_SESSION['cart'])) {
+$user = getCurrentUser();
+
+// Pull the real cart from the database, only items still actually purchasable
+$all_cart_items = $cartManager->getCartItems($user['id']);
+$cart_items = array_values(array_filter($all_cart_items, function ($item) {
+    return $item['status'] === 'active';
+}));
+
+// If there's nothing purchasable, send them back to the cart
+if (empty($cart_items)) {
     header('Location: cart.php');
     exit;
 }
@@ -16,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']);
     $address = trim($_POST['address']);
     $phone = trim($_POST['phone']);
+    $payment_method = trim($_POST['payment_method'] ?? 'cash_on_delivery');
 
     if (empty($name) || empty($email) || empty($address) || empty($phone)) {
         $error = "All fields are required.";
@@ -32,51 +41,72 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Calculate the total price of the cart
-    $total = 0;
-    foreach ($_SESSION['cart'] as $product) {
-        $total += $product['price'] * $product['quantity'];
+    // Re-fetch the cart fresh at submit time, in case something sold out
+    // between page load and form submission
+    $submit_cart_items = $cartManager->getCartItems($user['id']);
+    $unavailable_at_submit = array_filter($submit_cart_items, function ($item) {
+        return $item['status'] !== 'active';
+    });
+
+    if (!empty($unavailable_at_submit)) {
+        $_SESSION['error'] = 'One or more items in your cart sold out while you were checking out. Please review your cart.';
+        header('Location: cart.php');
+        exit;
     }
 
-    // Insert the order into the database
-    include('../config/db.php');  // Database connection
-    $query = "INSERT INTO orders (name, email, address, phone, total) VALUES (?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssssi", $name, $email, $address, $phone, $total);
-    
-    if ($stmt->execute()) {
-        $order_id = $stmt->insert_id; // Get the last inserted order ID
+    if (empty($submit_cart_items)) {
+        header('Location: cart.php');
+        exit;
+    }
 
-        // Insert the order items into the order_items table
-        foreach ($_SESSION['cart'] as $product_id => $product) {
-            $quantity = $product['quantity'];
-            $price = $product['price'];
+    $total = 0;
+    foreach ($submit_cart_items as $item) {
+        $total += $item['price'] * $item['quantity'];
+    }
+    $total += 5; // flat shipping fee, matches cart.php's summary
 
-            $item_query = "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
-            $item_stmt = $conn->prepare($item_query);
-            $item_stmt->bind_param("iiii", $order_id, $product_id, $quantity, $price);
+    $order_query = "INSERT INTO orders (user_id, total_amount, shipping_address, payment_method, status) VALUES (?, ?, ?, ?, 'pending')";
+    $order_stmt = $conn->prepare($order_query);
+    $order_stmt->bind_param("idss", $user['id'], $total, $address, $payment_method);
+
+    if ($order_stmt->execute()) {
+        $order_id = $order_stmt->insert_id;
+
+        // Insert the order items and mark each product sold
+        $item_query = "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
+        $item_stmt = $conn->prepare($item_query);
+
+        $sold_query = "UPDATE products SET status = 'sold' WHERE id = ?";
+        $sold_stmt = $conn->prepare($sold_query);
+
+        foreach ($submit_cart_items as $item) {
+            $product_id = $item['product_id'];
+            $quantity = $item['quantity'];
+            $price = $item['price'];
+
+            $item_stmt->bind_param("iiid", $order_id, $product_id, $quantity, $price);
             $item_stmt->execute();
+
+            $sold_stmt->bind_param("i", $product_id);
+            $sold_stmt->execute();
         }
 
-        // Send confirmation emails (customer and admin)
+        // Send confirmation emails (customer and admin); failures here don't block the order
         $subject = "Order Confirmation - ThriftX";
         $message = "Dear $name,\n\nThank you for your order! Here are your order details:\n\nOrder ID: $order_id\nTotal: ৳$total\n\nShipping Address: $address\n\nBest regards,\nThriftX Team";
-        mail($email, $subject, $message);
+        @mail($email, $subject, $message);
 
-        // Admin email notification
-        $admin_email = "admin@thriftx.com";  // Admin email
+        $admin_email = "admin@thriftx.com";
         $admin_subject = "New Order Received - ThriftX";
         $admin_message = "A new order has been placed.\n\nOrder ID: $order_id\nCustomer Name: $name\nTotal: ৳$total\n\nShipping Address: $address\nCustomer Email: $email\n\nBest regards,\nThriftX Team";
-        mail($admin_email, $admin_subject, $admin_message);
+        @mail($admin_email, $admin_subject, $admin_message);
 
-        // Clear the cart after successful checkout
-        unset($_SESSION['cart']);
+        // Clear the real cart after successful checkout
+        $cartManager->clearCart($user['id']);
 
-        // Redirect to the thank you page
         header('Location: thank_you.php');
         exit;
     } else {
-        // If the order insertion fails, return an error
         $error = "There was an error processing your order. Please try again.";
         $_SESSION['error'] = $error;
         header('Location: checkout.php');
@@ -93,111 +123,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Checkout - ThriftX</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
-    <!-- Sidebar Toggle -->
-    <input id="sidebar-toggle" type="checkbox">
-    <label class="toggle" for="sidebar-toggle">
-        <div class="bars"></div>
-        <div class="bars"></div>
-        <div class="bars"></div>
-    </label>
-
-    <!-- Sidebar Overlay -->
-    <div class="sidebar-overlay"></div>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-section">
-                <div class="logo-icon">T</div>
-                <span class="logo-text">ThriftX</span>
-            </div>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="dashboard.php" class="nav-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
-                <span>Dashboard</span>
-            </a>
-            <a href="cart.php" class="nav-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                </svg>
-                <span>Shopping Cart</span>
-            </a>
-            <a href="electronics.php" class="nav-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                    <line x1="8" y1="21" x2="16" y2="21"></line>
-                    <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg>
-                <span>Electronics</span>
-            </a>
-            <a href="clothing.php" class="nav-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>
-                </svg>
-                <span>Clothing</span>
-            </a>
-            <a href="furniture.php" class="nav-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"></path>
-                    <path d="M8 21V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v13"></path>
-                </svg>
-                <span>Furniture</span>
-            </a>
-            <a href="services.php" class="nav-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                <span>Services</span>
-            </a>
-            <a href="profile_settings.php" class="nav-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span>Profile & Settings</span>
-            </a>
-            <a href="../logout.php" class="nav-item logout">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16,17 21,12 16,7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                <span>Logout</span>
-            </a>
-        </nav>
-    </div>
+<body class="customer-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
+    <?php include('../includes/customer_sidebar.php'); ?>
 
     <!-- Page Content -->
     <div class="page-content customer-page-content">
         <?php include('../includes/customer_header.php'); ?>
-        
+
         <!-- Page Header -->
         <div class="page-header">
-            <div class="page-title">
-                <h1>Checkout</h1>
-                <p>Complete your purchase securely</p>
-            </div>
-            <div class="page-actions">
-                <a href="cart.php" class="btn btn-secondary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            <div class="page-title-group">
+                <a href="cart.php" class="page-back-btn" aria-label="Back to Cart">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12,19 5,12 12,5"></polyline>
                     </svg>
-                    Back to Cart
                 </a>
+                <div class="page-title">
+                    <h1>Checkout</h1>
+                    <p>Complete your purchase securely</p>
+                </div>
             </div>
         </div>
 
@@ -267,14 +212,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="order-summary">
                     <h3>Order Summary</h3>
                     <div class="order-items">
-                        <?php 
+                        <?php
                         $subtotal = 0;
-                        foreach ($_SESSION['cart'] as $product): 
+                        foreach ($cart_items as $product):
                             $subtotal += $product['price'] * $product['quantity'];
                         ?>
                             <div class="order-item">
                                 <div class="order-item-image">
-                                    <img src="https://via.placeholder.com/60x60?text=Product" alt="<?= htmlspecialchars($product['name']); ?>">
+                                    <img src="<?= !empty($product['image_url']) ? '../seller/' . htmlspecialchars($product['image_url']) : 'https://via.placeholder.com/60x60?text=Product'; ?>" alt="<?= htmlspecialchars($product['name']); ?>">
                                 </div>
                                 <div class="order-item-info">
                                     <div class="order-item-name"><?= htmlspecialchars($product['name']); ?></div>

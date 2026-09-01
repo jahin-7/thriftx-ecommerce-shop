@@ -3,6 +3,7 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 include('../config/db.php');
+require_once('../includes/activity_log.php');
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -54,9 +55,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_user'])) {
             $update_stmt->bind_param("ssssssi", $first_name, $last_name, $email, $phone, $address, $role, $user_id);
             
             if ($update_stmt->execute()) {
+                logActivity($conn, $_SESSION['user_id'], 'user_updated', 'user', $user_id, $email);
                 $success_message = "User updated successfully!";
-                // Refresh user data
-                $user = $stmt->get_result()->fetch_assoc();
+                // Refresh user data with a fresh query (the original $stmt's result is already consumed)
+                $refresh_stmt = $conn->prepare($user_query);
+                $refresh_stmt->bind_param("i", $user_id);
+                $refresh_stmt->execute();
+                $user = $refresh_stmt->get_result()->fetch_assoc();
             } else {
                 $error_message = "Error updating user: " . $update_stmt->error;
             }
@@ -82,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reset_password'])) {
         $password_stmt->bind_param("si", $hashed_password, $user_id);
         
         if ($password_stmt->execute()) {
+            logActivity($conn, $_SESSION['user_id'], 'user_password_reset', 'user', $user_id, $user['email']);
             $success_message = "Password reset successfully!";
         } else {
             $error_message = "Error resetting password: " . $password_stmt->error;
@@ -108,7 +114,7 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
     <title>Edit User - ThriftX Admin</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body class="admin-layout">
+<body class="admin-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Admin Header -->
     <?php include('../includes/admin_header.php'); ?>
 

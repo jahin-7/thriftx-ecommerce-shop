@@ -81,10 +81,10 @@ class CartManager {
      */
     public function getCartItems($user_id) {
         try {
-            $sql = "SELECT c.*, p.name, p.price, p.image_url, p.description 
-                    FROM cart c 
-                    LEFT JOIN products p ON c.product_id = p.id 
-                    WHERE c.user_id = ? 
+            $sql = "SELECT c.*, p.name, p.price, p.image_url, p.description, p.status
+                    FROM cart c
+                    LEFT JOIN products p ON c.product_id = p.id
+                    WHERE c.user_id = ?
                     ORDER BY c.created_at DESC";
             
             $stmt = $this->conn->prepare($sql);
@@ -171,10 +171,10 @@ class CartManager {
      */
     public function getCartTotal($user_id) {
         try {
-            $sql = "SELECT SUM(p.price * c.quantity) as total 
-                    FROM cart c 
-                    JOIN products p ON c.product_id = p.id 
-                    WHERE c.user_id = ?";
+            $sql = "SELECT SUM(p.price * c.quantity) as total
+                    FROM cart c
+                    JOIN products p ON c.product_id = p.id
+                    WHERE c.user_id = ? AND p.status = 'active'";
             $stmt = $this->conn->prepare($sql);
             $stmt->bind_param("i", $user_id);
             $stmt->execute();

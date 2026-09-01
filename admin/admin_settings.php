@@ -3,6 +3,7 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 include('../config/db.php');
+require_once('../includes/activity_log.php');
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -48,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_settings'])) {
         
         // Store settings in a JSON file (you can modify this to use database)
         if (file_put_contents('../config/settings.json', json_encode($settings))) {
+            logActivity($conn, $_SESSION['user_id'], 'settings_updated', 'settings', null, null);
             $success_message = "Settings updated successfully!";
         } else {
             $error_message = "Error updating settings. Please check file permissions.";
@@ -93,7 +95,7 @@ $stats['pending_orders'] = $conn->query("SELECT COUNT(*) as count FROM orders WH
     <title>Admin Settings - ThriftX Admin</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body class="admin-layout">
+<body class="admin-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Admin Header -->
     <?php include('../includes/admin_header.php'); ?>
 
@@ -129,6 +131,7 @@ $stats['pending_orders'] = $conn->query("SELECT COUNT(*) as count FROM orders WH
                 </div>
             <?php endif; ?>
 
+            <form method="POST" action="admin_settings.php" class="settings-form">
             <div class="settings-grid">
                 <!-- General Settings -->
                 <div class="settings-card">
@@ -137,39 +140,37 @@ $stats['pending_orders'] = $conn->query("SELECT COUNT(*) as count FROM orders WH
                         <p>Basic information about your marketplace</p>
                     </div>
                     <div class="card-content">
-                        <form method="POST" class="settings-form">
-                            <div class="form-group">
-                                <label for="site_name">Site Name *</label>
-                                <input type="text" id="site_name" name="site_name" value="<?= htmlspecialchars($current_settings['site_name']) ?>" required>
-                            </div>
+                        <div class="form-group">
+                            <label for="site_name">Site Name *</label>
+                            <input type="text" id="site_name" name="site_name" value="<?= htmlspecialchars($current_settings['site_name']) ?>" required>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="site_email">Site Email *</label>
-                                <input type="email" id="site_email" name="site_email" value="<?= htmlspecialchars($current_settings['site_email']) ?>" required>
-                            </div>
+                        <div class="form-group">
+                            <label for="site_email">Site Email *</label>
+                            <input type="email" id="site_email" name="site_email" value="<?= htmlspecialchars($current_settings['site_email']) ?>" required>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="site_phone">Contact Phone</label>
-                                <input type="tel" id="site_phone" name="site_phone" value="<?= htmlspecialchars($current_settings['site_phone']) ?>">
-                            </div>
+                        <div class="form-group">
+                            <label for="site_phone">Contact Phone</label>
+                            <input type="tel" id="site_phone" name="site_phone" value="<?= htmlspecialchars($current_settings['site_phone']) ?>">
+                        </div>
 
-                            <div class="form-group">
-                                <label for="site_address">Business Address</label>
-                                <textarea id="site_address" name="site_address" rows="3" placeholder="Enter your business address"><?= htmlspecialchars($current_settings['site_address']) ?></textarea>
-                            </div>
+                        <div class="form-group">
+                            <label for="site_address">Business Address</label>
+                            <textarea id="site_address" name="site_address" rows="3" placeholder="Enter your business address"><?= htmlspecialchars($current_settings['site_address']) ?></textarea>
+                        </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="currency">Currency</label>
-                                    <select id="currency" name="currency">
-                                        <option value="USD" <?= $current_settings['currency'] == 'USD' ? 'selected' : '' ?>>USD ($)</option>
-                                        <option value="EUR" <?= $current_settings['currency'] == 'EUR' ? 'selected' : '' ?>>EUR (€)</option>
-                                        <option value="GBP" <?= $current_settings['currency'] == 'GBP' ? 'selected' : '' ?>>GBP (£)</option>
-                                        <option value="CAD" <?= $current_settings['currency'] == 'CAD' ? 'selected' : '' ?>>CAD (C$)</option>
-                                    </select>
-                                </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="currency">Currency</label>
+                                <select id="currency" name="currency">
+                                    <option value="USD" <?= $current_settings['currency'] == 'USD' ? 'selected' : '' ?>>USD ($)</option>
+                                    <option value="EUR" <?= $current_settings['currency'] == 'EUR' ? 'selected' : '' ?>>EUR (€)</option>
+                                    <option value="GBP" <?= $current_settings['currency'] == 'GBP' ? 'selected' : '' ?>>GBP (£)</option>
+                                    <option value="CAD" <?= $current_settings['currency'] == 'CAD' ? 'selected' : '' ?>>CAD (C$)</option>
+                                </select>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
 
@@ -305,7 +306,7 @@ $stats['pending_orders'] = $conn->query("SELECT COUNT(*) as count FROM orders WH
 
             <!-- Save Button -->
             <div class="settings-actions">
-                <button type="submit" form="settings-form" class="btn btn-primary btn-large">
+                <button type="submit" name="update_settings" class="btn btn-primary btn-large">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                         <polyline points="17,21 17,13 7,13 7,21"></polyline>
@@ -314,42 +315,8 @@ $stats['pending_orders'] = $conn->query("SELECT COUNT(*) as count FROM orders WH
                     Save All Settings
                 </button>
             </div>
+            </form>
         </div>
     </div>
-
-    <script>
-        // Form submission
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('.settings-form');
-            const saveButton = document.querySelector('.settings-actions button');
-            
-            saveButton.addEventListener('click', function() {
-                // Add all form data to the form
-                const formData = new FormData();
-                
-                // Add all input values
-                form.querySelectorAll('input, textarea, select').forEach(input => {
-                    if (input.type === 'checkbox') {
-                        formData.append(input.name, input.checked ? '1' : '0');
-                    } else {
-                        formData.append(input.name, input.value);
-                    }
-                });
-                
-                // Add the submit button
-                formData.append('update_settings', '1');
-                
-                // Submit the form
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', 'admin_settings.php', true);
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        location.reload();
-                    }
-                };
-                xhr.send(formData);
-            });
-        });
-    </script>
 </body>
 </html>

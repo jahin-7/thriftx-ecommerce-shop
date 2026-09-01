@@ -10,7 +10,7 @@ session_start();
     <title>Thank You - ThriftX</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
+<body class="<?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Header Section -->
     <header class="header">
         <div class="logo">

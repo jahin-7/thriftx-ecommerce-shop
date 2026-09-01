@@ -3,6 +3,7 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 include('../config/db.php');
+require_once('../includes/activity_log.php');
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -38,10 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
     
     if ($delete_stmt->execute()) {
         // Delete the image file if it exists
-        if ($product['image_url'] && file_exists($product['image_url'])) {
-            unlink($product['image_url']);
+        if ($product['image_url'] && file_exists('../seller/' . $product['image_url'])) {
+            unlink('../seller/' . $product['image_url']);
         }
-        
+
+        logActivity($conn, $_SESSION['user_id'], 'product_deleted', 'product', $product_id, $product['name']);
         $_SESSION['success'] = "Product deleted successfully!";
         header('Location: admin_products.php');
         exit;
@@ -59,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
     <title>Delete Product - ThriftX Admin</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body class="admin-layout">
+<body class="admin-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Admin Header -->
     <?php include('../includes/admin_header.php'); ?>
 
@@ -97,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
                 
                 <div class="preview-content">
                     <div class="product-image">
-                        <?php if ($product['image_url'] && file_exists($product['image_url'])): ?>
-                            <img src="../<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                        <?php if ($product['image_url'] && file_exists('../seller/' . $product['image_url'])): ?>
+                            <img src="../seller/<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
                         <?php else: ?>
                             <div class="no-image">
                                 <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

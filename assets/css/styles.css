@@ -9,6 +9,37 @@
   --accent-color: #ff5733;
   --sidebar-width: 250px;
   --transition-speed: 0.4s;
+
+  /* Theme-aware surface tokens (dark theme = default) */
+  --body-bg-solid: #3b3b3b;
+  --body-bg-gradient: linear-gradient(135deg, rgba(72, 63, 92, 0.6) 25%, rgba(70, 17, 17, 0.3) 100%);
+  --glass-bg: var(--glass-bg);
+  --glass-bg-strong: var(--glass-bg-strong);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-border-soft: rgba(255, 255, 255, 0.1);
+  --glass-hover-bg: rgba(255, 255, 255, 0.2);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 255, 255, 0.2);
+}
+
+body.light-theme {
+  --font-color: #2b2b2b;
+  --font-color-sub: #6b6b6b;
+  --bg-color: #f4f2f0;
+  --bg-color-alt: #e6e2de;
+  --main-color: #1f1f1f;
+
+  --body-bg-solid: #f0ede9;
+  --body-bg-gradient: linear-gradient(135deg, rgba(255, 200, 170, 0.35) 25%, rgba(255, 235, 210, 0.5) 100%);
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.65) 100%);
+  --glass-bg-strong: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.8) 100%);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-border-soft: rgba(0, 0, 0, 0.06);
+  --glass-hover-bg: rgba(0, 0, 0, 0.05);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --input-bg: rgba(0, 0, 0, 0.03);
+  --input-border: rgba(0, 0, 0, 0.15);
 }
 
 * {
@@ -16,16 +47,17 @@
 }
 
 body {
-  background-color: #3b3b3b;
-  background-image: linear-gradient(135deg, rgba(72, 63, 92, 0.6) 25%, rgba(70, 17, 17, 0.3) 100%);
+  background-color: var(--body-bg-solid);
+  background-image: var(--body-bg-gradient);
   background-size: cover;
   background-position: center center;
+  background-attachment: fixed;
   margin: 0;
   padding: 0;
   font-family: 'Arial', sans-serif;
   color: var(--font-color);
   line-height: 1.6;
-  transition: transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
   overflow-x: hidden;
 }
 
@@ -304,7 +336,7 @@ body {
 }
 
 .nav a:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -349,18 +381,6 @@ body {
   box-shadow: 0 2px 8px rgba(255, 87, 51, 0.4);
 }
 
-.no-products {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 40px;
-  color: var(--font-color);
-}
-
-.no-products h3 {
-  color: var(--main-color);
-  margin-bottom: 10px;
-}
-
 /* Sidebar Overlay */
 .sidebar-overlay {
   position: fixed;
@@ -390,7 +410,8 @@ body {
   transition: left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 99;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--glass-border-soft);
+  overflow-y: auto;
 }
 
 .sidebar::before {
@@ -410,13 +431,13 @@ body {
   font-size: 1.2em;
   text-align: center;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .sidebar button {
   color: var(--main-color);
   background-color: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--input-border);
   font-size: 1em;
   padding: 12px 15px;
   border-radius: 8px;
@@ -467,8 +488,8 @@ body {
   transition: all 0.2s ease;
   position: relative;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--input-bg);
+  border: 1px solid var(--glass-border);
 }
 
 .sidebar-nav .nav-item:hover {
@@ -505,27 +526,189 @@ body {
   border-color: rgba(220, 53, 69, 0.5);
 }
 
+.sidebar-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 4px 4px 2px;
+}
+
+.sidebar-section-label {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 2px 4px 2px;
+}
+
+.sidebar-nav .nav-item--category {
+  padding: 9px 16px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-nav .nav-item--category svg {
+  width: 8px;
+  height: 8px;
+}
+
+/* Price filter box */
+.sidebar-filter-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 4px;
+}
+
+.sidebar-filter-box .sidebar-section-label {
+  margin: 0 0 8px 0;
+}
+
+.price-range-track {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 4px;
+}
+
+.price-range-slider {
+  width: 100%;
+  margin: 4px 0 10px;
+  accent-color: var(--main-color);
+  cursor: pointer;
+}
+
+.price-filter-apply {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--accent-color);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.price-filter-apply:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.active-price-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 87, 51, 0.15);
+  color: var(--accent-color);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.clear-price-filter {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* Collapsible categories section */
+.categories-collapse-toggle {
+  display: none;
+}
+
+.sidebar-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 2px 0;
+  padding: 8px 6px;
+  border-radius: 6px;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.sidebar-section-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-section-toggle .collapse-chevron {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.categories-collapse-toggle:checked ~ .sidebar-section-toggle .collapse-chevron {
+  transform: rotate(180deg);
+}
+
+.sidebar-categories-collapse {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+  max-height: 600px;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+  opacity: 1;
+}
+
+.categories-collapse-toggle:not(:checked) ~ .sidebar-categories-collapse {
+  max-height: 0;
+  opacity: 0;
+}
+
 /* Edit Product Styles */
 .edit-product-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 30px;
-  margin-bottom: 30px;
+  max-width: 1100px;
+  margin: 0 auto 30px;
+}
+
+/* Centered wrappers for admin settings/edit-user/delete-user/profile pages,
+   matching the .checkout-section centering convention used elsewhere */
+.settings-container,
+.edit-user-container,
+.delete-user-container,
+.profile-container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 0 30px;
+}
+
+.edit-user-grid,
+.delete-user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  margin-top: 20px;
 }
 
 .edit-product-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   overflow: hidden;
 }
 
 .edit-product-card .card-header {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   padding: 20px 30px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .edit-product-card .card-header h3 {
@@ -556,7 +739,7 @@ body {
   height: 200px;
   border-radius: 10px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -632,32 +815,34 @@ body {
 
 .toggle {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  width: 40px;
-  height: 40px;
+  top: 11px;
+  left: 16px;
+  width: 38px;
+  height: 38px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  z-index: 100;
-  background: var(--accent-color);
-  border-radius: 8px;
+  gap: 5px;
+  z-index: 1001;
+  background: #fff;
+  border: 2px solid #1f1f1f;
+  border-radius: 50%;
+  box-sizing: border-box;
   transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .toggle:hover {
-  background: #e04a2b;
   transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
 }
 
 .bars {
-  width: 20px;
-  height: 3px;
-  background-color: var(--main-color);
+  width: 18px;
+  height: 2.5px;
+  background-color: #1f1f1f;
   border-radius: 2px;
   transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center;
@@ -696,9 +881,24 @@ body {
   transform: translateX(var(--sidebar-width));
 }
 
+/* On desktop, an open sidebar pushes the page content aside (via margin) instead of
+   sliding a dark overlay on top of it like the mobile drawer does. The sidebar still
+   opens/closes via the same hamburger toggle at every screen size. */
+@media (min-width: 769px) {
+  .sidebar-overlay {
+    display: none;
+  }
+
+  #sidebar-toggle:checked ~ .page-content {
+    transform: none;
+    margin-left: var(--sidebar-width);
+  }
+}
+
 /* Page Content Wrapper */
 .page-content {
-  transition: transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+              margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
 }
 
@@ -714,11 +914,11 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 15px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   padding: 8px;
   border-radius: 25px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
 }
 
 .search-bar {
@@ -858,13 +1058,13 @@ body {
 
 .product-item {
   text-align: center;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   position: relative;
   overflow: hidden;
 }
@@ -943,7 +1143,7 @@ body {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   text-align: center;
   padding: 40px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--glass-border-soft);
   margin-top: 60px;
 }
 
@@ -960,19 +1160,6 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
   padding: 20px;
-}
-
-/* Product Card */
-.product-card {
-  background-color: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-10px);
 }
 
 .product-image {
@@ -1017,11 +1204,11 @@ body {
   max-width: 800px;
   margin: 30px auto;
   padding: 30px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
 }
 
 .checkout-section h2 {
@@ -1056,7 +1243,7 @@ body {
 .form-group textarea,
 .form-group select {
   padding: 12px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--input-border);
   border-radius: 8px;
   background: rgba(30, 30, 30, 0.8) !important;
   color: var(--font-color) !important;
@@ -1134,10 +1321,10 @@ body {
 }
 
 .product-item {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -1231,9 +1418,9 @@ body {
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
 }
 
@@ -1253,10 +1440,10 @@ body {
 .product-preview {
   display: flex;
   gap: 20px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   margin-bottom: 20px;
 }
@@ -1363,16 +1550,16 @@ body {
 /* Admin Dashboard Styling */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
 
 .stat-box {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   padding: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1407,10 +1594,10 @@ body {
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
 }
 
@@ -1423,13 +1610,13 @@ body {
   font-weight: 600;
   padding: 15px 12px;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .admin-table td {
   color: var(--font-color);
   padding: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .admin-table tbody tr:hover {
@@ -1496,7 +1683,7 @@ body {
   right: 0;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .header-left {
@@ -1646,6 +1833,51 @@ body {
   gap: 8px;
 }
 
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(20deg);
+}
+
+.header-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.header-logout-btn:hover {
+  background: rgba(220, 53, 69, 0.85);
+  border-color: rgba(220, 53, 69, 0.9);
+}
+
+@media (max-width: 640px) {
+  .header-logout-btn span {
+    display: none;
+  }
+}
+
 .notification-dropdown, .user-dropdown {
   position: relative;
 }
@@ -1664,7 +1896,7 @@ body {
 }
 
 .notification-btn:hover, .user-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
 }
 
 .user-btn {
@@ -1860,7 +2092,7 @@ body.admin-layout .page-content {
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .admin-page-header h2 {
@@ -1889,11 +2121,11 @@ body.admin-layout .page-content {
 }
 
 .admin-filters {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   padding: 20px;
   margin-bottom: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
 }
 
@@ -1913,7 +2145,7 @@ body.admin-layout .page-content {
 .filter-group .search-input {
   width: 250px;
   padding: 10px 15px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--input-border);
   border-radius: 8px;
   background: rgba(30, 30, 30, 0.8);
   color: var(--font-color);
@@ -1928,7 +2160,7 @@ body.admin-layout .page-content {
 
 .filter-select {
   padding: 10px 15px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--input-border);
   border-radius: 8px;
   background: rgba(30, 30, 30, 0.8);
   color: var(--font-color);
@@ -1981,10 +2213,10 @@ body.admin-layout .page-content {
 }
 
 .admin-product-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -2016,10 +2248,67 @@ body.admin-layout .page-content {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+  color: #fff;
+}
+
+.admin-product-card .product-status.status-active {
+  background: #3d9a5c;
+}
+
+.admin-product-card .product-status.status-inactive {
+  background: #b0413e;
+}
+
+.admin-product-card .product-status.status-sold {
+  background: #6b6b6b;
 }
 
 .admin-product-card .product-info {
   padding: 20px;
+}
+
+/* Out-of-stock badge shown on customer-facing product listings */
+.product-item--unavailable {
+  opacity: 0.65;
+}
+
+.product-item--unavailable img {
+  filter: grayscale(70%);
+}
+
+.stock-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+}
+
+.stock-badge--sold {
+  background: #6b6b6b;
+}
+
+.stock-badge--inactive {
+  background: #b0413e;
+}
+
+.stock-badge--active {
+  background: #3d9a5c;
+}
+
+.add-to-cart-btn:disabled,
+.view-product-btn:disabled,
+.checkout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #999 !important;
+  transform: none !important;
 }
 
 .admin-product-card .product-info h3 {
@@ -2099,11 +2388,12 @@ body.admin-layout .page-content {
 }
 
 .no-products {
+  grid-column: 1 / -1;
   text-align: center;
   padding: 60px 20px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
 }
 
@@ -2128,12 +2418,12 @@ body.admin-layout .page-content {
 }
 
 .page-btn {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   color: var(--font-color);
   text-decoration: none;
   padding: 10px 15px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   transition: all 0.3s ease;
 }
 
@@ -2187,8 +2477,8 @@ body.admin-layout .page-content {
   position: relative;
   text-align: center;
   padding: 20px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .user-avatar-large {
@@ -2257,10 +2547,10 @@ body.admin-layout .page-content {
 }
 
 .chart-container {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
 }
 
@@ -2292,7 +2582,7 @@ body.admin-layout .page-content {
 .chart-bar {
   flex: 1;
   height: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -2333,8 +2623,8 @@ body.admin-layout .page-content {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .order-id {
@@ -2381,7 +2671,7 @@ body.admin-layout .page-content {
 .status-select {
   width: 100%;
   padding: 8px 12px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--input-border);
   border-radius: 6px;
   background: rgba(30, 30, 30, 0.8);
   color: var(--font-color);
@@ -2416,21 +2706,53 @@ body.admin-layout .page-content {
   right: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
   margin-bottom: 30px;
 }
 
 /* Page Header Styling */
 .page-header {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   padding: 20px 30px;
   margin-bottom: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
+  border-left: 4px solid var(--accent-color);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.page-title-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.page-back-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--font-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.page-back-btn:hover {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #fff;
+  transform: translateX(-2px);
 }
 
 .page-header .page-title h1 {
@@ -2438,6 +2760,7 @@ body.admin-layout .page-content {
   margin: 0 0 5px 0;
   font-size: 1.8em;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .page-header .page-title p {
@@ -2507,7 +2830,7 @@ body.admin-layout .page-content {
   padding: 8px 40px 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   color: white;
   font-size: 14px;
   outline: none;
@@ -2614,7 +2937,7 @@ body.admin-layout .page-content {
 }
 
 .seller-header .user-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
 }
 
 .seller-header .user-avatar {
@@ -2759,18 +3082,18 @@ body.admin-layout .page-content {
 
 /* Product Form Card Styling */
 .product-form-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+  background: var(--glass-bg-strong);
   padding: 25px 30px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .card-header h2 {
@@ -2784,6 +3107,24 @@ body.admin-layout .page-content {
   color: var(--font-color-sub);
   margin: 0;
   font-size: 1em;
+}
+
+.card-content {
+  padding: 30px;
+}
+
+.edit-user-card,
+.delete-user-card {
+  background: var(--glass-bg);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.delete-user-card.warning .card-header {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.25) 0%, rgba(220, 53, 69, 0.1) 100%);
 }
 
 .product-form {
@@ -2814,7 +3155,7 @@ body.admin-layout .page-content {
 .form-group textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--input-border);
   border-radius: 8px;
   background: rgba(30, 30, 30, 0.8);
   color: var(--font-color);
@@ -2901,7 +3242,7 @@ body.admin-layout .page-content {
   justify-content: flex-end;
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--glass-border-soft);
 }
 
 .cancel-btn,
@@ -2979,7 +3320,7 @@ body.admin-layout .page-content {
   right: 0;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 /* Customer Header - Match Admin Header Styling */
@@ -2987,6 +3328,7 @@ body.admin-layout .page-content {
   display: flex;
   align-items: center;
   gap: 20px;
+  padding-left: 46px; /* room for the fixed sidebar toggle button */
 }
 
 .customer-header .logo-section {
@@ -3037,7 +3379,7 @@ body.admin-layout .page-content {
   padding: 8px 40px 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   color: white;
   font-size: 14px;
   outline: none;
@@ -3184,7 +3526,7 @@ body.admin-layout .page-content {
 }
 
 .customer-header .user-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
 }
 
 .customer-header .user-avatar {
@@ -3313,6 +3655,7 @@ body.admin-layout .page-content {
   .customer-header .header-right {
     width: 100%;
     justify-content: center;
+    padding-left: 0;
   }
   
   .customer-header .main-nav {
@@ -3402,6 +3745,22 @@ body.admin-layout .page-content {
 
 .cart-item:last-child {
   margin-bottom: 0;
+}
+
+.cart-item--unavailable {
+  opacity: 0.6;
+  border-color: #b0413e;
+}
+
+.cart-item--unavailable img {
+  filter: grayscale(70%);
+}
+
+.cart-item-unavailable-notice {
+  color: #e0847f !important;
+  font-weight: 600 !important;
+  font-size: 0.85em !important;
+  margin-top: 6px !important;
 }
 
 .cart-item-image img {
@@ -3592,17 +3951,19 @@ body.admin-layout .page-content {
 }
 
 .checkout-form-section {
-  background: white;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
   border-radius: 15px;
   padding: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
 }
 
 .checkout-form-section h3 {
   color: var(--main-color);
   margin-bottom: 25px;
   font-size: 1.4em;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid var(--glass-border-soft);
   padding-bottom: 15px;
 }
 
@@ -3628,11 +3989,12 @@ body.admin-layout .page-content {
 .form-select {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--input-border);
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.2s ease;
-  background: white;
+  background: var(--input-bg);
+  color: var(--font-color);
 }
 
 .form-group input:focus,
@@ -3784,36 +4146,19 @@ body.admin-layout .page-content {
 }
 
 .search-info {
-  background: white;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
   border-radius: 10px;
   padding: 15px 20px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
   color: var(--font-color-sub);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .empty-state-icon {
-  color: #ccc;
-  margin-bottom: 20px;
-}
-
-.empty-state h3 {
-  color: var(--main-color);
-  margin-bottom: 10px;
-  font-size: 1.5em;
-}
-
-.empty-state p {
   color: var(--font-color-sub);
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .products-grid {
@@ -3824,17 +4169,19 @@ body.admin-layout .page-content {
 }
 
 .product-card {
-  background: white;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
   border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
   position: relative;
 }
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
 }
 
 .product-image {
@@ -3933,10 +4280,10 @@ body.admin-layout .page-content {
 }
 
 .settings-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
@@ -3955,7 +4302,7 @@ body.admin-layout .page-content {
   justify-content: space-between;
   align-items: center;
   padding: 15px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .info-item:last-child {
@@ -3980,20 +4327,168 @@ body.admin-layout .page-content {
   text-transform: uppercase;
 }
 
-/* Statistics Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 20px;
-  padding: 30px;
-}
+.role-badge.role-admin { background: #e0a53d; color: #1a1a1a; }
+.role-badge.role-seller { background: #3d9a5c; color: #fff; }
+.role-badge.role-customer { background: #4a90d9; color: #fff; }
 
 .stat-item {
   text-align: center;
   padding: 20px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border-soft);
+}
+
+/* Icon + label stat rows used on edit-user/delete-user/settings pages */
+.user-stats {
+  display: grid;
+  gap: 15px;
+  padding: 30px;
+}
+
+.user-stats .stat-item,
+.settings-card .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-align: left;
+  padding: 15px;
+}
+
+.stat-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 87, 51, 0.15);
+  color: var(--accent-color);
+}
+
+.stat-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 1.3em;
+  color: var(--main-color);
+}
+
+.stat-content p {
+  margin: 0;
+  color: var(--font-color-sub);
+  font-size: 0.85em;
+}
+
+/* User preview + badges (delete-user confirmation card) */
+.user-preview {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 30px;
+}
+
+.user-badges {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+/* Deletion impact list */
+.impact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 30px;
+}
+
+.impact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--font-color);
+}
+
+.impact-item svg {
+  flex-shrink: 0;
+  color: #dc3545;
+}
+
+/* Settings toggles */
+.toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 30px;
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.toggle-info h4 {
+  margin: 0 0 4px 0;
+  color: var(--main-color);
+}
+
+.toggle-info p {
+  margin: 0;
+  color: var(--font-color-sub);
+  font-size: 0.85em;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 26px;
+  transition: 0.2s;
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent-color);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 30px;
 }
 
 .stat-value {
@@ -4058,19 +4553,19 @@ body.admin-layout .page-content {
 
 /* Admin Product Management Styling */
 .product-preview {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
 }
 
 .preview-header {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+  background: var(--glass-bg-strong);
   padding: 25px 30px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .preview-header h3 {
@@ -4104,7 +4599,7 @@ body.admin-layout .page-content {
   height: 150px;
   object-fit: cover;
   border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--input-border);
 }
 
 .no-image {
@@ -4114,7 +4609,7 @@ body.admin-layout .page-content {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--input-bg);
   border-radius: 12px;
   border: 2px dashed rgba(255, 255, 255, 0.3);
   color: var(--font-color-sub);
@@ -4169,7 +4664,7 @@ body.admin-layout .page-content {
   background: rgba(255, 255, 255, 0.05);
   padding: 15px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border-soft);
 }
 
 .product-meta p {
@@ -4246,7 +4741,7 @@ body.admin-layout .page-content {
   border-radius: 12px;
   padding: 20px;
   margin: 20px 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border-soft);
 }
 
 .product-info-section h3 {
@@ -4267,7 +4762,7 @@ body.admin-layout .page-content {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .info-item:last-child {
@@ -4299,7 +4794,7 @@ body.admin-layout .page-content {
   max-height: 150px;
   object-fit: cover;
   border-radius: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--input-border);
 }
 
 .image-preview p {
@@ -4353,11 +4848,11 @@ body.admin-layout .page-content {
 .order-summary {
   margin-top: 30px;
   padding: 25px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: var(--glass-bg);
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--glass-border);
 }
 
 .order-summary h3 {
@@ -4377,7 +4872,7 @@ body.admin-layout .page-content {
   justify-content: space-between;
   align-items: center;
   padding: 15px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border-soft);
 }
 
 .order-item:last-child {
@@ -4434,7 +4929,7 @@ body.admin-layout .page-content {
 }
 
 .total-line.total-final {
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid var(--glass-border);
   margin-top: 10px;
   padding-top: 15px;
   font-size: 1.4em;
@@ -4459,11 +4954,11 @@ body.admin-layout .page-content {
     align-items: center;
     gap: 20px;
     padding: 20px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    background: var(--glass-bg);
     border-radius: 15px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--glass-border);
     transition: all 0.3s ease;
 }
 
@@ -4508,9 +5003,9 @@ body.admin-layout .page-content {
     width: 60px;
     padding: 8px;
     text-align: center;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--input-border);
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--input-bg);
     color: var(--font-color);
     font-size: 1em;
     font-weight: 600;
@@ -4575,11 +5070,11 @@ body.admin-layout .page-content {
     flex-direction: column;
     align-items: flex-end;
     padding: 25px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    background: var(--glass-bg);
     border-radius: 15px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--glass-border);
     margin-top: 20px;
 }
 
@@ -4624,11 +5119,11 @@ body.admin-layout .page-content {
     color: var(--font-color);
     font-size: 1.2em;
     padding: 40px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    background: var(--glass-bg);
     border-radius: 15px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--glass-border);
     margin: 20px 0;
 }
 
@@ -5155,8 +5650,8 @@ body.admin-layout .page-content {
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
     border-radius: 6px;
     color: white;
     text-decoration: none;

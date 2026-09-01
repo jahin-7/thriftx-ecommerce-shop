@@ -10,7 +10,7 @@ $user = getCurrentUser();
 $product_id = $_GET['id'];
 
 // Fetch the product details based on the product ID
-$query = "SELECT * FROM products WHERE id = ? AND status = 'active'";
+$query = "SELECT * FROM products WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $product_id);
 $stmt->execute();
@@ -22,16 +22,24 @@ if (!$product) {
     exit;
 }
 
+$is_available = $product['status'] === 'active';
+
 // Handle adding to cart
 if (isset($_POST['action']) && $_POST['action'] == 'add_to_cart') {
+    if (!$is_available) {
+        $_SESSION['error_message'] = 'This item is no longer available.';
+        header('Location: product_page.php?id=' . $product_id);
+        exit;
+    }
+
     $quantity = $_POST['quantity'];
-    
+
     if ($cartManager->addToCart($user['id'], $product_id, $quantity)) {
         $_SESSION['success_message'] = 'Item added to cart successfully!';
     } else {
         $_SESSION['error_message'] = 'Failed to add item to cart.';
     }
-    
+
     header('Location: product_page.php?id=' . $product_id);
     exit;
 }
@@ -54,27 +62,29 @@ $reviews_result = $review_stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $product['name']; ?> - ThriftX</title>
+    <title><?= htmlspecialchars($product['name']); ?> - ThriftX</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
+<body class="customer-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
+    <?php include('../includes/customer_sidebar.php'); ?>
+
     <!-- Page Content -->
     <div class="page-content customer-page-content">
         <?php include('../includes/customer_header.php'); ?>
-        
+
         <!-- Page Header -->
         <div class="page-header">
-            <div class="page-title">
-                <h1><?= htmlspecialchars($product['name']); ?></h1>
-                <p>Product Details</p>
-            </div>
-            <div class="page-actions">
-                <a href="dashboard.php" class="btn btn-secondary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <div class="page-title-group">
+                <a href="dashboard.php" class="page-back-btn" aria-label="Back to Dashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12,19 5,12 12,5"></polyline>
                     </svg>
-                    Back to Dashboard
                 </a>
+                <div class="page-title">
+                    <h1><?= htmlspecialchars($product['name']); ?></h1>
+                    <p>Product Details</p>
+                </div>
             </div>
         </div>
 
@@ -101,7 +111,7 @@ $reviews_result = $review_stmt->get_result();
                         <img src="<?= $image['image_url']; ?>" alt="<?= $product['name']; ?>" class="product-main-image">
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <img src="<?= !empty($product['image']) ? '../seller/uploads/' . $product['image'] : 'https://via.placeholder.com/400x400?text=No+Image'; ?>" 
+                    <img src="<?= !empty($product['image_url']) ? '../seller/' . $product['image_url'] : 'https://via.placeholder.com/400x400?text=No+Image'; ?>"
                          alt="<?= $product['name']; ?>" class="product-main-image">
                 <?php endif; ?>
             </div>
@@ -118,22 +128,32 @@ $reviews_result = $review_stmt->get_result();
                     </div>
                 <?php endif; ?>
 
-                <!-- Add to Cart Form -->
-                <form action="product_page.php?id=<?= $product['id']; ?>" method="POST" class="add-to-cart-form">
-                    <div class="quantity-selector">
-                        <label for="quantity">Quantity:</label>
-                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="99" class="quantity-input">
+                <?php if (!$is_available): ?>
+                    <div class="alert alert-error">
+                        <?= $product['status'] === 'sold' ? 'This item has already been sold.' : 'This item is currently unavailable.'; ?>
                     </div>
+                <?php endif; ?>
 
-                    <button type="submit" name="action" value="add_to_cart" class="btn btn-primary add-to-cart-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="9" cy="21" r="1"></circle>
-                            <circle cx="20" cy="21" r="1"></circle>
-                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                        </svg>
-                        Add to Cart
-                    </button>
-                </form>
+                <!-- Add to Cart Form -->
+                <?php if ($is_available): ?>
+                    <form action="product_page.php?id=<?= $product['id']; ?>" method="POST" class="add-to-cart-form">
+                        <div class="quantity-selector">
+                            <label for="quantity">Quantity:</label>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" max="99" class="quantity-input">
+                        </div>
+
+                        <button type="submit" name="action" value="add_to_cart" class="btn btn-primary add-to-cart-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            Add to Cart
+                        </button>
+                    </form>
+                <?php else: ?>
+                    <button type="button" class="btn btn-primary add-to-cart-btn" disabled>Out of Stock</button>
+                <?php endif; ?>
             </div>
         </div>
 

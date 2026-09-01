@@ -3,6 +3,7 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 include('../config/db.php');
+require_once('../includes/activity_log.php');
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -70,7 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
             
             // Commit transaction
             $conn->commit();
-            
+
+            logActivity($conn, $_SESSION['user_id'], 'user_deleted', 'user', $user_id, $user['email']);
             $_SESSION['success'] = "User deleted successfully!";
             header('Location: admin_users.php');
             exit;
@@ -92,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
     <title>Delete User - ThriftX Admin</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body class="admin-layout">
+<body class="admin-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Admin Header -->
     <?php include('../includes/admin_header.php'); ?>
 
@@ -143,7 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_delete'])) {
                                 <p class="user-email"><?= htmlspecialchars($user['email']) ?></p>
                                 <div class="user-badges">
                                     <span class="role-badge role-<?= $user['role'] ?>"><?= ucfirst($user['role']) ?></span>
-                                    <span class="status-badge status-<?= $user['status'] ?>"><?= ucfirst($user['status']) ?></span>
                                 </div>
                                 <p class="user-join-date">Joined: <?= date('M d, Y', strtotime($user['created_at'])) ?></p>
                             </div>

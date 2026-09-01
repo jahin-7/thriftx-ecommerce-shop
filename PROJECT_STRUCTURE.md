@@ -1,6 +1,6 @@
 # ThriftX Project Structure
 
-## 📁 Production Files (Git Tracked)
+## Production files (git tracked)
 
 ### Core Application
 ```
@@ -8,6 +8,7 @@ ThriftX/
 ├── admin/                    # Admin panel
 │   ├── admin_dashboard.php
 │   ├── admin_users.php
+│   ├── admin_add_user.php
 │   ├── admin_products.php
 │   ├── admin_orders.php
 │   ├── admin_profile.php
@@ -18,7 +19,10 @@ ThriftX/
 │   ├── admin_edit_user.php
 │   ├── admin_delete_user.php
 │   ├── admin_analytics.php
-│   └── order_details.php
+│   ├── admin_logs.php
+│   ├── admin_search.php
+│   ├── order_details.php
+│   └── update_order.php
 ├── assets/                   # Static assets
 │   ├── css/
 │   │   └── styles.css        # Main stylesheet
@@ -33,25 +37,22 @@ ThriftX/
 │   ├── checkout.php
 │   ├── product_page.php
 │   ├── search_results.php
-│   ├── electronics.php
-│   ├── clothing.php
-│   ├── furniture.php
-│   ├── services.php
+│   ├── category.php
 │   ├── profile_settings.php
 │   └── thank_you.php
 ├── includes/                 # Shared components
 │   ├── auth.php             # Authentication
 │   ├── cart_functions.php   # Cart management
+│   ├── activity_log.php     # Admin/seller action audit log
 │   ├── admin_header.php     # Admin header
 │   ├── seller_header.php    # Seller header
-│   ├── customer_header.php  # Customer header
-│   ├── login.HTML           # Login page
-│   ├── signup.php           # Registration
-│   └── not-available.php    # Error page
+│   ├── customer_header.php  # Customer top header
+│   └── customer_sidebar.php # Customer side navigation
 ├── seller/                   # Seller interface
 │   ├── seller_dashboard.php
 │   ├── post_product.php
 │   ├── seller_products.php
+│   ├── seller_orders.php
 │   ├── edit_product.php
 │   ├── delete_product.php
 │   ├── profile_settings.php
@@ -66,7 +67,7 @@ ThriftX/
 └── PROJECT_STRUCTURE.md    # This file
 ```
 
-## 🗑️ Development Files (Moved to Scrap)
+## Development files (moved to scrap)
 
 ### Development Scripts
 ```
@@ -91,7 +92,7 @@ scrap/
     └── services.html
 ```
 
-## 🚀 Git Setup Commands
+## Git setup commands
 
 ```bash
 # Initialize Git repository
@@ -119,9 +120,9 @@ git remote add origin <your-repository-url>
 git push -u origin main
 ```
 
-## 📋 Features Implemented
+## Features implemented
 
-### ✅ Core Features
+### Core features
 - [x] User authentication (login/register)
 - [x] Role-based access (admin/seller/customer)
 - [x] Product management (CRUD operations)
@@ -132,7 +133,7 @@ git push -u origin main
 - [x] Order management
 - [x] User profile management
 
-### ✅ UI/UX Features
+### UI/UX features
 - [x] Modern Facebook-like header design
 - [x] Consistent orange theme
 - [x] Responsive design
@@ -141,7 +142,7 @@ git push -u origin main
 - [x] Success/error messaging
 - [x] Mobile-optimized interface
 
-### ✅ Technical Features
+### Technical features
 - [x] Database integration
 - [x] Session management
 - [x] File upload handling
@@ -150,7 +151,7 @@ git push -u origin main
 - [x] Security measures
 - [x] Clean code structure
 
-## 🔧 Ready for Production
+## Ready for production
 
 The project is now clean, organized, and ready for Git deployment with:
 - All development files moved to scrap folder

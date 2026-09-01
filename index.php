@@ -110,7 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
     <link rel="stylesheet" href="assets/css/styles.css">
     <style>
         body {
-            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            background: var(--body-bg-solid);
+            background-image: var(--body-bg-gradient);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -119,87 +120,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
             margin: 0;
             padding: 20px;
         }
-        
+
+        .theme-toggle-corner {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+
         .auth-container {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--glass-border);
             width: 100%;
             max-width: 400px;
         }
-        
+
         .logo {
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
         .logo h1 {
             color: #ff5733;
             font-size: 2.5em;
             margin: 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
-        
+
         .form-tabs {
             display: flex;
             margin-bottom: 30px;
             border-radius: 10px;
             overflow: hidden;
-            background: rgba(0, 0, 0, 0.2);
+            background: var(--input-bg);
         }
-        
+
         .tab-button {
             flex: 1;
             padding: 15px;
             background: transparent;
             border: none;
-            color: #fff;
+            color: var(--font-color);
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 16px;
             font-weight: 600;
         }
-        
+
         .tab-button.active {
             background: #ff5733;
             color: #fff;
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
-            color: #fff;
+            color: var(--font-color);
             margin-bottom: 8px;
             font-weight: 500;
         }
-        
+
         .form-group input, .form-group select {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid var(--input-border);
             border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: var(--input-bg);
+            color: var(--font-color);
             font-size: 16px;
             transition: all 0.3s ease;
             box-sizing: border-box;
         }
-        
+
         .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #ff5733;
-            background: rgba(255, 255, 255, 0.15);
             box-shadow: 0 0 0 3px rgba(255, 87, 51, 0.3);
         }
-        
+
         .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--font-color-sub);
         }
         
         .btn {
@@ -260,7 +266,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['signup'])) {
         }
     </style>
 </head>
-<body>
+<body class="<?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
+    <a href="theme_toggle.php?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="theme-toggle-btn theme-toggle-corner" aria-label="Toggle light/dark theme" title="Toggle theme">
+        <?php if (($_SESSION['theme'] ?? 'dark') === 'light'): ?>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        <?php else: ?>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+        <?php endif; ?>
+    </a>
     <div class="auth-container">
         <div class="logo">
             <h1>ThriftX</h1>

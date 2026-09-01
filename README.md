@@ -2,7 +2,7 @@
 
 A comprehensive e-commerce platform for buying and selling second-hand items, built with PHP, MySQL, and modern web technologies.
 
-## 🚀 Features
+## Features
 
 ### For Customers
 - **Product Browsing**: Browse products by categories (Electronics, Clothing, Furniture, Services)
@@ -24,7 +24,7 @@ A comprehensive e-commerce platform for buying and selling second-hand items, bu
 - **Analytics**: View platform statistics and insights
 - **System Settings**: Configure platform-wide settings
 
-## 🛠️ Technology Stack
+## Technology stack
 
 - **Backend**: PHP 8.2+
 - **Database**: MySQL 8.0+
@@ -32,7 +32,7 @@ A comprehensive e-commerce platform for buying and selling second-hand items, bu
 - **Server**: Apache (XAMPP)
 - **Styling**: Custom CSS with modern design principles
 
-## 📁 Project Structure
+## Project structure
 
 ```
 ThriftX/
@@ -54,12 +54,12 @@ ThriftX/
 ├── seller/              # Seller interface pages
 │   └── uploads/         # Product images (with .gitkeep)
 ├── scrap/               # Development files and prototypes
-├── thriftx_database.sql # Database schema
+├── database_setup.sql   # Database schema
 ├── .gitignore          # Git ignore rules
 └── README.md           # This file
 ```
 
-## 🚀 Installation & Setup
+## Installation and setup
 
 ### Prerequisites
 - XAMPP (Apache + MySQL + PHP)
@@ -79,7 +79,7 @@ ThriftX/
    - Create a new database named `thriftx`
    - Import the database schema:
      ```sql
-     -- Run the SQL commands from thriftx_database.sql
+     -- Run the SQL commands from database_setup.sql
      ```
 
 3. **Configuration**
@@ -90,7 +90,7 @@ ThriftX/
    - Navigate to `http://localhost/ThriftX/`
    - The application should be ready to use
 
-## 👥 User Roles
+## User roles
 
 ### Customer
 - Browse and search products
@@ -110,14 +110,14 @@ ThriftX/
 - Handle orders
 - System administration
 
-## 🎨 Design Features
+## Design features
 
 - **Modern UI**: Clean, responsive design with Facebook-like header
 - **Orange Theme**: Consistent orange color scheme throughout
 - **Mobile Responsive**: Optimized for all device sizes
 - **User-Friendly**: Intuitive navigation and interactions
 
-## 🔧 Development
+## Development
 
 ### Database Schema
 The application uses a well-structured MySQL database with the following main tables:
@@ -136,18 +136,18 @@ The application uses a well-structured MySQL database with the following main ta
 - **Search Functionality**: Advanced product search
 - **Responsive Design**: Mobile-first approach
 
-## 📝 License
+## License
 
 This project is proprietary software. All rights reserved.
 
-## 🤝 Contributing
+## Contributing
 
 This is a private project. For any issues or suggestions, please contact the development team.
 
-## 📞 Support
+## Support
 
 For technical support or questions, please contact the development team.
 
 ---
 
-**ThriftX** - Making second-hand shopping easy and accessible! 🛍️
+**ThriftX**, making second-hand shopping easy and accessible.

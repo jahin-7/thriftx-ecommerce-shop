@@ -1,9 +1,16 @@
 <?php
 include('../config/db.php'); // Include the database connection file
+require_once('../includes/activity_log.php');
 
 // Start session for better error handling
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
+}
+
+// Only logged-in sellers may post products
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
+    header('Location: ../index.php');
+    exit;
 }
 
 // Handle form submission
@@ -53,27 +60,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
         
         if ($check_column->num_rows > 0) {
             // Specifications column exists, include it in the query
-            $query = "INSERT INTO products (name, description, price, category, image_url, specifications, seller_id) 
+            $query = "INSERT INTO products (name, description, price, category, image_url, specifications, seller_id)
                       VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
-            
-            // Get seller ID from session (assuming user is logged in as seller)
-            $seller_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1; // Default to 1 if no session
-            
+
+            $seller_id = $_SESSION['user_id'];
+
             $stmt->bind_param("ssisssi", $name, $description, $price, $category, $target_file, $specifications, $seller_id);
         } else {
             // Specifications column doesn't exist, exclude it from the query
-            $query = "INSERT INTO products (name, description, price, category, image_url, seller_id) 
+            $query = "INSERT INTO products (name, description, price, category, image_url, seller_id)
                       VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
-            
-            // Get seller ID from session (assuming user is logged in as seller)
-            $seller_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1; // Default to 1 if no session
-            
+
+            $seller_id = $_SESSION['user_id'];
+
             $stmt->bind_param("ssissi", $name, $description, $price, $category, $target_file, $seller_id);
         }
 
         if ($stmt->execute()) {
+            logActivity($conn, $seller_id, 'product_created', 'product', $stmt->insert_id, $name);
             $_SESSION['success'] = "Product added successfully!";
             header("Location: seller_dashboard.php");
             exit;
@@ -98,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     <title>Post Product - ThriftX Seller</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body>
+<body class="<?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Seller Header -->
     <?php include('../includes/seller_header.php'); ?>
 
@@ -165,6 +171,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                 <option value="clothing">Clothing</option>
                                 <option value="furniture">Furniture</option>
                                 <option value="services">Services</option>
+                                <option value="books">Books</option>
+                                <option value="sports">Sports & Outdoors</option>
+                                <option value="home_garden">Home & Garden</option>
+                                <option value="beauty_health">Beauty & Health</option>
+                                <option value="toys_games">Toys & Games</option>
+                                <option value="other">Other</option>
                             </select>
                         </div>
                     </div>

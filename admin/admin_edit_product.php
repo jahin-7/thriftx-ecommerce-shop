@@ -3,6 +3,7 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 include('../config/db.php');
+require_once('../includes/activity_log.php');
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -69,10 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_product'])) {
                 // Upload new image
                 if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
                     // Delete old image if it exists
-                    if ($product['image_url'] && file_exists($product['image_url'])) {
-                        unlink($product['image_url']);
+                    if ($product['image_url'] && file_exists('../seller/' . $product['image_url'])) {
+                        unlink('../seller/' . $product['image_url']);
                     }
-                    $image_url = "seller/uploads/" . $unique_filename;
+                    $image_url = "uploads/" . $unique_filename;
                 } else {
                     $error_message = "Error uploading image.";
                 }
@@ -96,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_product'])) {
             }
             
             if ($update_stmt->execute()) {
+                logActivity($conn, $_SESSION['user_id'], 'product_updated', 'product', $product_id, $name);
                 $_SESSION['success'] = "Product updated successfully!";
                 header('Location: admin_products.php');
                 exit;
@@ -115,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_product'])) {
     <title>Edit Product - ThriftX Admin</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
-<body class="admin-layout">
+<body class="admin-layout <?= (($_SESSION['theme'] ?? 'dark') === 'light') ? 'light-theme' : '' ?>">
     <!-- Facebook-style Admin Header -->
     <?php include('../includes/admin_header.php'); ?>
 
@@ -179,6 +181,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_product'])) {
                                 <option value="clothing" <?= $product['category'] === 'clothing' ? 'selected' : '' ?>>Clothing</option>
                                 <option value="furniture" <?= $product['category'] === 'furniture' ? 'selected' : '' ?>>Furniture</option>
                                 <option value="services" <?= $product['category'] === 'services' ? 'selected' : '' ?>>Services</option>
+                                <option value="books" <?= $product['category'] === 'books' ? 'selected' : '' ?>>Books</option>
+                                <option value="sports" <?= $product['category'] === 'sports' ? 'selected' : '' ?>>Sports & Outdoors</option>
+                                <option value="home_garden" <?= $product['category'] === 'home_garden' ? 'selected' : '' ?>>Home & Garden</option>
+                                <option value="beauty_health" <?= $product['category'] === 'beauty_health' ? 'selected' : '' ?>>Beauty & Health</option>
+                                <option value="toys_games" <?= $product['category'] === 'toys_games' ? 'selected' : '' ?>>Toys & Games</option>
+                                <option value="other" <?= $product['category'] === 'other' ? 'selected' : '' ?>>Other</option>
                             </select>
                         </div>
                     </div>
@@ -195,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_product'])) {
                             <select id="status" name="status" required>
                                 <option value="active" <?= $product['status'] === 'active' ? 'selected' : '' ?>>Active</option>
                                 <option value="inactive" <?= $product['status'] === 'inactive' ? 'selected' : '' ?>>Inactive</option>
-                                <option value="pending" <?= $product['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
+                                <option value="sold" <?= $product['status'] === 'sold' ? 'selected' : '' ?>>Sold</option>
                             </select>
                         </div>
                     </div>
@@ -203,9 +211,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_product'])) {
                     <div class="form-group">
                         <label for="image">Product Image</label>
                         <div class="current-image">
-                            <?php if ($product['image_url'] && file_exists("../" . $product['image_url'])): ?>
+                            <?php if ($product['image_url'] && file_exists("../seller/" . $product['image_url'])): ?>
                                 <div class="image-preview">
-                                    <img src="../<?= htmlspecialchars($product['image_url']) ?>" alt="Current image">
+                                    <img src="../seller/<?= htmlspecialchars($product['image_url']) ?>" alt="Current image">
                                     <p>Current image</p>
                                 </div>
                             <?php endif; ?>
